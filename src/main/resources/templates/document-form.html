@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentart wählen</title>
+    <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1, h2 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-container, .image-container {
+            flex: 1;
+            min-width: 280px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin: 10px 0 5px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        input[type="file"] {
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        select {
+            margin-bottom: 10px;
+        }
+
+        .form-section {
+            margin-top: 10px;
+            display: none;
+        }
+
+        #imageContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            min-height: 300px;
+        }
+
+        #selectedImage {
+            max-width: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-container">
+        <h1>Dokumentart wählen</h1>
+        <form action="/*" method="POST">
+            <label for="docType">Wählen Sie die Dokumentart:</label>
+            <select id="docType" name="docType" onchange="showForm()" required>
+                <option value="">--Wählen Sie die Dokumentart--</option>
+                <option value="ResidencePermit">Aufenthaltserlaubnis</option>
+                <option value="Reisepass">Reisepass</option>
+            </select>
+        </form>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="fileInput">Bild wählen:</label>
+            <input type="file" id="fileInput" name="file" accept="image/*">
+            <button type="submit">Submit Document</button>
+        </form>
+    </div>
+
+    <div class="image-container">
+        <h2>Vorschau</h2>
+        <div id="imageContainer">
+            <img id="selectedImage" src="" alt="" />
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="form-container form-section" id="residencePermitForm">
+        <h2>Aufenthaltserlaubnis</h2>
+        <input type="hidden" id="tempImageId" name="tempImageId">
+        <input type="hidden" id="tempFilePath" name="tempFilePath">
+        <input type="hidden" id="imageId" name="imageId" value="">
+
+        <label for="serialNumberResidencePermit">Seriennummer</label>
+        <input type="text" id="serialNumberResidencePermit" name="serialNumber" >
+
+        <label for="firstNameResidencePermit">Vorname:</label>
+        <input type="text" id="firstNameResidencePermit" name="firstName" required>
+
+        <label for="lastNameResidencePermit">Nachname:</label>
+        <input type="text" id="lastNameResidencePermit" name="lastName" required>
+
+        <label for="genderResidencePermit">Geschlecht:</label>
+        <select id="genderResidencePermit" name="gender" required>
+            <option value="">--Wählen Sie--</option>
+            <option value="Male">Männlich</option>
+            <option value="Female">Weiblich</option>
+            <option value="Other">Andere</option>
+        </select>
+
+        <label for="nationalityResidencePermit">Staatsangehörigkeit:</label>
+        <input type="text" id="nationalityResidencePermit" name="nationality" required>
+
+        <label for="birthDateResidencePermit">Geburtsdatum:</label>
+        <input type="date" id="birthDateResidencePermit" name="birthDate" required>
+
+        <label for="validUntilResidencePermit">Gültig bis:</label>
+        <input type="date" id="validUntilResidencePermit" name="validUntil" required>
+
+        <button type="button" id="saveButton">Daten senden</button>
+    </div>
+
+    <div class="form-container form-section" id="passportForm">
+        <h2>Reisepass</h2>
+        <label for="documentNumber">Reisepassnummer:</label>
+        <input type="text" id="documentNumber" name="documentNumber" required>
+
+        <label for="firstName">Vorname:</label>
+        <input type="text" id="firstName" name="firstName" required>
+
+        <label for="lastName">Nachname:</label>
+        <input type="text" id="lastName" name="lastName" required>
+
+        <label for="gender">Geschlecht:</label>
+        <select id="gender" name="gender" required>
+            <option value="">--Wählen Sie--</option>
+            <option value="Male">Männlich</option>
+            <option value="Female">Weiblich</option>
+            <option value="Other">Andere</option>
+        </select>
+
+        <label for="nationality">Staatsangehörigkeit:</label>
+        <input type="text" id="nationality" name="nationality" required>
+
+        <label for="birthDate">Geburtsdatum:</label>
+        <input type="date" id="birthDate" name="birthDate" required>
+
+        <label for="country">Land:</label>
+        <input type="text" id="country" name="country" required>
+
+        <label for="issuedBy">Ausgestellt von:</label>
+        <input type="text" id="issuedBy" name="issuedBy" required>
+
+        <label for="expirationDate">Ablaufdatum:</label>
+        <input type="date" id="expirationDate" name="expirationDate" required>
+    </div>
+</div>
+
+<script>
+    var cropper;
+
+    function showForm() {
+        var docType = document.getElementById("docType").value;
+        var residencePermitForm = document.getElementById("residencePermitForm");
+        var passportForm = document.getElementById("passportForm");
+
+        residencePermitForm.style.display = "none";
+        passportForm.style.display = "none";
+
+        if (docType === "ResidencePermit") {
+            residencePermitForm.style.display = "block";
+        } else if (docType === "Reisepass") {
+            passportForm.style.display = "block";
+        }
+    }
+
+    console.log('Скрипт загружен и готов к выполнению.');
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        console.log('Файл выбран пользователем.');
+
+        const file = event.target.files[0];
+        if (file) {
+            console.log('Начинаем чтение файла.');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                console.log('Файл успешно загружен в память.');
+                const image = document.getElementById('selectedImage');
+                image.src = e.target.result;
+                image.style.display = 'block';
+
+                console.log('Инициализация Cropper.js.');
+                if (cropper) {
+                    cropper.destroy();
+                    console.log('Старый экземпляр Cropper.js уничтожен.');
+                }
+                cropper = new Cropper(image, {
+                    viewMode: 1,
+                    aspectRatio: NaN,
+                    autoCrop: false
+                });
+                console.log('Cropper.js успешно инициализирован.');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            console.log('Файл не выбран или произошла ошибка при выборе файла.');
+        }
+    });
+
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        console.log('Форма отправлена.');
+
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Wählen Sie eine Datei aus.');
+            console.log('Ошибка: файл не выбран.');
+            return;
+        }
+        console.log('Файл для загрузки найден:', file.name);
+
+        if (!cropper) {
+            alert('Cropper ist nicht initialisiert.');
+            console.log('Ошибка: Cropper.js не был инициализирован.');
+            return;
+        }
+
+        console.log('Получение данных обрезки из Cropper.js.');
+        const cropData = cropper.getData(true);
+        console.log('Данные обрезки:', cropData);
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('cropX', cropData.x);
+        formData.append('cropY', cropData.y);
+        formData.append('cropWidth', cropData.width);
+        formData.append('cropHeight', cropData.height);
+        console.log('FormData сформирован.');
+
+        console.log('Отправка файла на сервер по адресу /uploadImage...');
+        fetch('/uploadImage', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => {
+                console.log('Ответ от сервера для /uploadImage получен:', response);
+                if (!response.ok) {
+                    throw new Error(`Server returned status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Данные от /uploadImage:', data);
+                if (data.tempFilePath) {
+                    document.getElementById('tempFilePath').value = data.tempFilePath;
+                    alert('Bild wurde erfolgreich hochgeladen.');
+                    document.getElementById('imageId').value = data.tempFilePath;
+                    console.log('Поле imageId установлено в:', data.tempFilePath);
+                    console.log('Данные для /uploadGERResidencePermitDocument:', {
+                        tempFilePath: data.tempFilePath,
+                        cropX: cropData.x,
+                        cropY: cropData.y,
+                        cropWidth: cropData.width,
+                        cropHeight: cropData.height
+                    });
+
+                    console.log('Отправка данных для анализа на /uploadGERResidencePermitDocument...');
+                    return fetch('/uploadGERResidencePermitDocument', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            tempFilePath: data.tempFilePath,
+                            cropX: cropData.x,
+                            cropY: cropData.y,
+                            cropWidth: cropData.width,
+                            cropHeight: cropData.height,
+                        }),
+                    });
+                } else {
+                    console.error('tempFilePath отсутствует в ответе сервера:', data);
+                    throw new Error('Fehler beim Hochladen des Bildes.');
+                }
+            })
+            .then(response => {
+                console.log('Ответ от сервера для /uploadGERResidencePermitDocument получен:', response);
+                if (!response.ok) {
+                    throw new Error('Fehler beim OCR-Analyse.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Данные от /uploadGERResidencePermitDocument:', data);
+                if (data.serialNumber) {
+                    document.getElementById('serialNumberResidencePermit').value = data.serialNumber;
+                }
+                if (data.firstName) {
+                    document.getElementById('firstNameResidencePermit').value = data.firstName;
+                }
+                if (data.lastName) {
+                    document.getElementById('lastNameResidencePermit').value = data.lastName;
+                }
+                if (data.gender) {
+                    document.getElementById('genderResidencePermit').value = data.gender;
+                }
+                if (data.nationality) {
+                    document.getElementById('nationalityResidencePermit').value = data.nationality;
+                }
+                if (data.birthDate) {
+                    document.getElementById('birthDateResidencePermit').value = data.birthDate;
+                }
+                if (data.validUntil) {
+                    document.getElementById('validUntilResidencePermit').value = data.validUntil;
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert(error.message);
+            });
+    });
+
+    // Кнопка отправки данных из формы Aufenthaltserlaubnis
+    document.getElementById("saveButton").addEventListener("click", function(event) {
+        const formData = {
+            serialNumber: document.getElementById("serialNumberResidencePermit").value,
+            firstName: document.getElementById("firstNameResidencePermit").value,
+            lastName: document.getElementById("lastNameResidencePermit").value,
+            gender: document.getElementById("genderResidencePermit").value,
+            nationality: document.getElementById("nationalityResidencePermit").value,
+            birthDate: document.getElementById("birthDateResidencePermit").value,
+            validUntil: document.getElementById("validUntilResidencePermit").value,
+            tempFilePath: document.getElementById("tempFilePath").value
+        };
+
+        if (!formData.tempFilePath) {
+            alert("Bild wurde nicht hochgeladen. Bitte laden Sie zuerst ein Bild hoch.");
+            return;
+        }
+
+        fetch('/saveGERResidencePermitDocument', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+    });
+</script>
+</body>
+</html>
